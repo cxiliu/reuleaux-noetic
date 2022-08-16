@@ -31,6 +31,8 @@ IKFAST_COMPILE_ASSERT(IKFAST_VERSION == 0x10000048);
 #include <algorithm>
 #include <complex>
 
+#include <boost/format.hpp>
+
 #ifndef IKFAST_ASSERT
 #include <stdexcept>
 #include <sstream>
@@ -249,12 +251,12 @@ inline float IKatan2Simple(float fy, float fx)
 }
 inline float IKatan2(float fy, float fx)
 {
-  if (isnan(fy))
+  if (std::isnan(fy))
   {
-    IKFAST_ASSERT(!isnan(fx));  // if both are nan, probably wrong value will be returned
+    IKFAST_ASSERT(!std::isnan(fx));  // if both are nan, probably wrong value will be returned
     return float(IKPI_2);
   }
-  else if (isnan(fx))
+  else if (std::isnan(fx))
   {
     return 0;
   }
@@ -266,12 +268,12 @@ inline double IKatan2Simple(double fy, double fx)
 }
 inline double IKatan2(double fy, double fx)
 {
-  if (isnan(fy))
+  if (std::isnan(fy))
   {
-    IKFAST_ASSERT(!isnan(fx));  // if both are nan, probably wrong value will be returned
+    IKFAST_ASSERT(!std::isnan(fx));  // if both are nan, probably wrong value will be returned
     return IKPI_2;
   }
-  else if (isnan(fx))
+  else if (std::isnan(fx))
   {
     return 0;
   }
@@ -291,7 +293,7 @@ inline CheckValue< T > IKatan2WithCheck(T fy, T fx, T epsilon)
   CheckValue< T > ret;
   ret.valid = false;
   ret.value = 0;
-  if (!isnan(fy) && !isnan(fx))
+  if (!std::isnan(fy) && !std::isnan(fx))
   {
     if (IKabs(fy) >= IKFAST_ATAN2_MAGTHRESH || IKabs(fx) > IKFAST_ATAN2_MAGTHRESH)
     {
@@ -1151,7 +1153,7 @@ public:
           j4array[1] = -j4array[0];
           sj4array[1] = -sj4array[0];
         }
-        else if (isnan(cj4array[0]))
+        else if (std::isnan(cj4array[0]))
         {
           // probably any value will work
           j4valid[0] = true;

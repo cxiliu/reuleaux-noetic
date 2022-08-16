@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<launch>
+
+<!--set you robot's moveit pkg here-->
+<arg name = "moveit_pkg" default="kr210_moveit"/>
+
+<!--Launch moveit required pkgs for your robot-->
+<include file="$(find map_generation)/launch/moveit_pkgs.launch">
+    <arg name="moveit_pkg" value="$(arg moveit_pkg)"/>
+</include>
+
+<!--Reachability map parameters-->
+<arg name="move_group" default="kr210_arm" />
+<arg name="res" default="2.0" />
+<arg name="rad" default="3.0" />
+
+<!--Node for map generation-->
+<node name="map_gen" pkg="map_generation" type="map_generation_node" output="screen">
+  <param name="group_name" value="$(arg move_group)" />
+  <param name="pkg_name" value="$(arg moveit_pkg)"/>
+  <param name="resolution" value="$(arg res)" />
+  <param name="radius" value="$(arg rad)" />
+  <param name="check_collision" value="true"/>
+  <param name="path" value="$(find map_generation)/maps/" />
+  <param name="filename" value="kr210_r$(arg rad)_s$(arg res).h5" />
+
+</node>
+
+</launch>
