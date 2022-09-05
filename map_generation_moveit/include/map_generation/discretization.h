@@ -17,11 +17,13 @@ class Discretization
 public:
   Discretization();
   Discretization(geometry_msgs::Pose pose, double resolution = 0.1, double radius = 0.8);
+  Discretization(double resolution = 0.1);
 
   int getNumOfSpheres();
   int getNumOfPoses();
   void getInitialWorkspace(map_generation::WorkSpace& ws);
   void discretize();
+  void populateWorkspace(const std::vector<geometry_msgs::Point> &points);
 
   void getCenters(std::vector<geometry_msgs::Point>& points);
 

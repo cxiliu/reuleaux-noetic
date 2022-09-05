@@ -21,8 +21,11 @@ class mapGeneration
 public:
   mapGeneration(ros::NodeHandle &node, const std::string& group_name, const std::string& path,
                 const std::string& filename, const std::string& pkg_name, const double& resolution, const double& radius, bool check_collision);
+  mapGeneration(ros::NodeHandle &node, const std::string& group_name, const double& resolution, bool check_collision);
 
   void generate();
+
+  void computeCustomPoints(const std::vector<geometry_msgs::Point> &points, map_generation::WorkSpace &result);
 
 
 private:

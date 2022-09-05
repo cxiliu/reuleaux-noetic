@@ -20,10 +20,10 @@ find_package(catkin REQUIRED COMPONENTS
   moveit_core
 )
 
-find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
-
-include(${QT_USE_FILE})
-
+find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+set(QT_LIBRARIES Qt5::Widgets)
+# find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
+# include(${QT_USE_FILE})
 
 add_definitions(-DQT_NO_KEYWORDS)
 
@@ -67,18 +67,18 @@ catkin_package(
   INCLUDE_DIRS ${base_placement_plugin_INCLUDE_DIRECTORIES}
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS
-  interactive_markers
-  pluginlib
-  roscpp
-  rqt_gui
-  rviz
-  rqt_gui_cpp
-  visualization_msgs
-  map_creator
+    interactive_markers
+    pluginlib
+    roscpp
+    rqt_gui
+    rviz
+    rqt_gui_cpp
+    visualization_msgs
+    map_creator
 )
 
-qt4_wrap_cpp(base_placement_plugin_MOCS ${base_placement_plugin_HDRS} )
-qt4_wrap_ui(base_placement_plugin_UIS_H ${base_placement_plugin_UIS} )
+qt5_wrap_cpp(base_placement_plugin_MOCS ${base_placement_plugin_HDRS} )
+qt5_wrap_ui(base_placement_plugin_UIS_H ${base_placement_plugin_UIS} )
 
 include_directories(${base_placement_plugin_INCLUDE_DIRECTORIES} ${catkin_INCLUDE_DIRS})
 add_library(${PROJECT_NAME} ${base_placement_plugin_SRCS} ${base_placement_plugin_MOCS} ${base_placement_plugin_UIS_H}) # ${base_placement_plugin_UIS_H}

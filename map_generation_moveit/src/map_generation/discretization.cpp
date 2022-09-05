@@ -22,14 +22,22 @@ Discretization::Discretization(geometry_msgs::Pose pose, double resolution, doub
   poses_.resize(0);
  }
 
+Discretization::Discretization(double resolution):
+  resolution_(resolution)
+{
+  centers_.resize(0);
+  poses_.resize(0);
+  ws_.WsSpheres.clear();
+ }
+
 octomap::OcTree* Discretization::generateBoxTree(const octomap::point3d &origin, const double resolution, const double diameter)
 {
   octomap::OcTree* tree = new octomap::OcTree(float(resolution)/2);
-  for(float x = origin.x() - diameter * 1.5; x<=origin.x() + diameter * 1.5; x+=resolution)
+  for(float x = origin.x() - diameter * 1.0; x<=origin.x() + diameter * 1.0; x+=resolution)
   {
-    for(float y = origin.y() - diameter * 1.5; y<=origin.y() + diameter * 1.5; y+=resolution)
+    for(float y = origin.y() - diameter * 1.0; y<=origin.y() + diameter * 1.0; y+=resolution)
     {
-      for(float z = 0; z<=origin.z() + diameter * 1.5; z+=resolution)
+      for(float z = 0; z<=origin.z() + diameter * 1.0; z+=resolution)
       {
         octomap::point3d point;
         point.x() = x;
@@ -65,7 +73,8 @@ int Discretization::getNumOfSpheres()
 
 void Discretization::createPosesOnSphere(const geometry_msgs::Point &center, const double r, std::vector<geometry_msgs::Pose> &poses)
 {
-  const double DELTA = M_PI/5.;
+  const double SPHERE_R = r * 0.25;
+  const double DELTA = M_PI/5.; // 10 steps latitudinal , 5 steps longitudinal (36 degree increments)
   const unsigned MAX_INDEX  (2 * 5 *5);
   static std::vector<geometry_msgs::Point> position_vector(MAX_INDEX);
   static std::vector<tf::Quaternion> quaternion(MAX_INDEX);
@@ -82,7 +91,8 @@ void Discretization::createPosesOnSphere(const geometry_msgs::Point &center, con
         position_vector[index].y = sin(phi)*sin(theta);
         position_vector[index].z = cos(theta);
         tf::Quaternion quat;
-        quat.setRPY(0, ((M_PI/2)+theta), phi);
+        quat.setRPY(0, (theta), phi);
+        // quat.setRPY(0, ((M_PI/2)+theta), phi);
         quat.normalize();
         quaternion[index] = quat;
         index++;
@@ -94,9 +104,9 @@ void Discretization::createPosesOnSphere(const geometry_msgs::Point &center, con
   geometry_msgs::Pose pose;
   for(int i=0;i<MAX_INDEX;++i)
   {
-    pose.position.x = r * position_vector[i].x + center.x;
-    pose.position.y = r * position_vector[i].y + center.y;
-    pose.position.z = r * position_vector[i].z + center.z;
+    pose.position.x = SPHERE_R * position_vector[i].x + center.x;
+    pose.position.y = SPHERE_R * position_vector[i].y + center.y;
+    pose.position.z = SPHERE_R * position_vector[i].z + center.z;
     pose.orientation.x = quaternion[i].x();
     pose.orientation.y = quaternion[i].y();
     pose.orientation.z = quaternion[i].z();
@@ -143,6 +153,12 @@ void Discretization::discretize()
 void Discretization::getCenters(std::vector<geometry_msgs::Point> &points)
 {
   points = centers_;
+}
+
+void Discretization::populateWorkspace(const std::vector<geometry_msgs::Point> &points)
+{
+  centers_ = points;
+  createPoses(centers_, poses_);
 }
 
 } //end namespace reuleaux

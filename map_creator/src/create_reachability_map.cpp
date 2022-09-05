@@ -38,6 +38,8 @@ int main(int argc, char **argv)
   std::string file = str(boost::format("%s_r%d_reachability.h5") % k.getRobotName() % resolution);
   std::string path(ros::package::getPath("map_creator") + "/maps/");
   std::string filename;
+  bool export_robot_solution = false;
+
   if (argc == 2)
   {
     if (!isFloat(argv[1]))
@@ -49,6 +51,33 @@ int main(int argc, char **argv)
     resolution = atof(argv[1]);
     file = str(boost::format("%s_r%d_reachability.h5") % k.getRobotName() % resolution);
     filename = path + file;
+  }
+
+  else if (argc == 4)
+  {
+    std::string name;
+    name = argv[2];
+    if (!isFloat(argv[1]) && isFloat(argv[2]))
+    {
+      ROS_ERROR_STREAM("The first argument is map resolution"
+      "second argument is the map filename"
+      "third is output data type");
+      return 0;
+    }
+
+    resolution = atof(argv[1]);
+    std::string str(argv[2]);
+    std::string typ(argv[3]);
+
+    if ((typ == "true") || (typ == "True")){
+      filename = path + str + "_" + "axisvalues" +  "_" + argv[1] + ".h5";
+      export_robot_solution = true;
+    }
+    else{
+      filename = path + str + "_" + "poses" +  "_" + argv[1] + ".h5";
+      export_robot_solution = false;
+      ROS_INFO("3rd argument is not set to 'true' - exporting pose values ...");
+    }
   }
 
   else if (argc == 3)
@@ -95,7 +124,7 @@ int main(int argc, char **argv)
     // The center of every voxels are stored in a vector
 
     sphere_discretization::SphereDiscretization sd;
-    float r = 1;
+    float r = 2; // map area is r*1.5
     octomap::point3d origin = octomap::point3d(0, 0, 0);  // This point will be the base of the robot
     octomap::OcTree *tree = sd.generateBoxTree(origin, r, resolution);
     std::vector< octomap::point3d > new_data;
@@ -123,7 +152,8 @@ int main(int argc, char **argv)
     // corresponding sphere centers
     // If the resolution is 0.01 the programs not responds
 
-    float radius = resolution;
+    float radius = resolution * 0.5;
+    // float radius = resolution;
 
     VectorOfVectors sphere_coord;
     sphere_coord.resize( new_data.size() );
@@ -155,6 +185,8 @@ int main(int argc, char **argv)
     MultiMapPtr pose_col_filter;
     VectorOfVectors ik_solutions;
     ik_solutions.reserve( pose_col.size() );
+    ROS_INFO(export_robot_solution ? "EXPORTING ROBOT AXIS VALUES" : "EXPORTING POSE");
+    int counter = 0;
 
     for (MultiVector::iterator it = pose_col.begin(); it != pose_col.end(); ++it)
     {
@@ -162,8 +194,14 @@ int main(int argc, char **argv)
       int solns;
       if (k.isIKSuccess(it->first, joints, solns))
       {
-        pose_col_filter.insert( std::make_pair( it->second, &(it->first)));
         ik_solutions.push_back(joints);
+        if (export_robot_solution){
+        pose_col_filter.insert( std::make_pair( it->second, &(ik_solutions[counter])));
+        }
+        else{
+        pose_col_filter.insert( std::make_pair( it->second, &(it->first)));
+        }
+        counter ++;
         // cout<<it->first[0]<<" "<<it->first[1]<<" "<<it->first[2]<<" "<<it->first[3]<<" "<<it->first[4]<<"
         // "<<it->first[5]<<" "<<it->first[6]<<endl;
       }

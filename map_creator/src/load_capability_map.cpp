@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 
     map_creator::capability cp;
     cp.header.stamp = ros::Time::now();
-    cp.header.frame_id = "/base_link";
+    cp.header.frame_id = "base_link";
     cp.resolution = resolution;
 
     for(std::vector<std::vector<double> >::iterator it = cap_data.begin(); it != cap_data.end(); ++it)

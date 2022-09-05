@@ -1,0 +1,6 @@
+std_msgs/String move_group
+std_msgs/Float32 sphere_offset
+std_msgs/Bool check_collision
+geometry_msgs/Point[] points
+---
+map_generation/WorkSpace ws

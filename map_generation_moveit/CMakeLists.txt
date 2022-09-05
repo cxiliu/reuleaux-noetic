@@ -23,6 +23,11 @@ add_message_files(
  WorkSpace.msg
 )
 
+add_service_files(
+  FILES
+  ComputeCapability.srv
+)
+
 generate_messages(
  DEPENDENCIES
  geometry_msgs std_msgs
@@ -74,3 +79,8 @@ install(DIRECTORY include/${PROJECT_NAME}/
 add_executable(map_generation_node src/nodes/map_generation_node.cpp)
 add_dependencies(map_generation_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(map_generation_node map_generation ${catkin_LIBRARIES})
+
+
+add_executable(compute_capability_service src/nodes/compute_capability_service.cpp)
+add_dependencies(compute_capability_service ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(compute_capability_service map_generation ${catkin_LIBRARIES})

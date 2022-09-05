@@ -2,7 +2,8 @@
 <launch>
 
 <!--set you robot's moveit pkg here-->
-<arg name = "moveit_pkg" default="kr210_moveit"/>
+<arg name = "moveit_pkg" default="wangen_moveit"/>
+<!-- <arg name = "moveit_pkg" default="kr210_moveit"/> -->
 
 <!--Launch moveit required pkgs for your robot-->
 <include file="$(find map_generation)/launch/moveit_pkgs.launch">
@@ -10,19 +11,26 @@
 </include>
 
 <!--Reachability map parameters-->
-<arg name="move_group" default="kr210_arm" />
-<arg name="res" default="2.0" />
-<arg name="rad" default="3.0" />
+
+<arg name="move_group" default="wangen_setup" />
+<!-- <arg name="move_group" default="kr210_arm" /> -->
+
+<arg name="res" default="0.5" />
+<!-- <arg name="res" default="0.25" /> -->
+
+<arg name="rad" default="1.5" />
+<!-- <arg name="rad" default="3.0" /> -->
 
 <!--Node for map generation-->
-<node name="map_gen" pkg="map_generation" type="map_generation_node" output="screen">
+<arg name="node_start_delay" default="3.0" /> 
+<node name="map_gen" pkg="map_generation" type="map_generation_node" output="screen" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' ">
   <param name="group_name" value="$(arg move_group)" />
   <param name="pkg_name" value="$(arg moveit_pkg)"/>
   <param name="resolution" value="$(arg res)" />
   <param name="radius" value="$(arg rad)" />
   <param name="check_collision" value="true"/>
   <param name="path" value="$(find map_generation)/maps/" />
-  <param name="filename" value="kr210_r$(arg rad)_s$(arg res).h5" />
+  <param name="filename" value="$(arg move_group)_r$(arg rad)_s$(arg res).h5" />
 
 </node>
 

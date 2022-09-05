@@ -21,6 +21,46 @@ mapGeneration::mapGeneration(ros::NodeHandle& node, const std::string &group_nam
   filtered_ws_.WsSpheres.clear();
 }
 
+mapGeneration::mapGeneration(ros::NodeHandle& node, const std::string &group_name, 
+                             const double &resolution, bool check_collision)
+{
+  nh_ = node;
+  group_name_ = group_name;
+  resolution_ = resolution;
+  check_collision_= check_collision;
+  group_.reset(new moveit::planning_interface::MoveGroupInterface(group_name_));
+  init_ws_.WsSpheres.clear();
+  filtered_ws_.WsSpheres.clear();
+}
+
+void mapGeneration::computeCustomPoints(const std::vector<geometry_msgs::Point> &points, 
+                                        map_generation::WorkSpace &result)
+{
+  ros::Time startit = ros::Time::now();
+
+  // create poses around points and populate the workspace with WsSpheres
+  reuleaux::Discretization* disc(new reuleaux::Discretization(resolution_));
+  disc->populateWorkspace(points);
+  disc->getInitialWorkspace(init_ws_);
+  reuleaux::getPoseAndSphereSize(init_ws_, init_sp_size_, init_pose_size_);
+  delete disc;
+  ROS_INFO("Initial workspace has %d spheres and %d poses", init_sp_size_, init_pose_size_);
+
+  // compute reachability and get filtered / reachable workspace
+  reuleaux::ReachAbility* reach(new reuleaux::ReachAbility(nh_,group_name_, check_collision_));
+  reach->setInitialWorkspace(init_ws_);
+  reach->createReachableWorkspace();
+  reach->getFinalWorkspace(filtered_ws_);
+  reuleaux::getPoseAndSphereSize(filtered_ws_, final_sp_size_, final_pose_size_);
+  delete reach;
+  ROS_INFO("Final workspace has %d spheres and %d poses", final_sp_size_, final_pose_size_);
+
+  // report compute time
+  double dif3 = ros::Duration( ros::Time::now() - startit).toSec();
+  ROS_INFO("Time for computing reachability is %.2lf seconds.", dif3);
+  result = filtered_ws_;
+}
+
 void mapGeneration::discretizeWorkspace(geometry_msgs::Pose& pose)
 {
   reuleaux::Discretization* disc(new reuleaux::Discretization(pose,resolution_, radius_));
